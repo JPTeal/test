@@ -1,0 +1,50 @@
+import os
+from datetime import datetime
+
+local_file = "/Users/jean-paulteal/Documents/Python/OwnerOfFile/LocalFileDummy.py"
+local_file_owner = os.stat(local_file).st_uid
+
+# get current directory 
+cur_dir = "/Users/jean-paulteal/Documents/Python/OwnerOfFile"
+new_folder_path = "tests"
+
+# get new directory to find test files in subfolder
+new_dir = os.path.join(cur_dir, new_folder_path)
+
+#change folder into new path with test files 
+os.chdir(new_dir)
+
+# find files in folder 
+files = os.walk(os.getcwd(), topdown = False)
+
+file_info = []
+
+# walk through folder 
+for dir_path, dir_name, file_names in os.walk(os.getcwd()):
+    for file_name in file_names:
+        owner = os.stat(file_name).st_uid
+        if owner == local_file_owner:
+            mod_time = os.stat(file_name).st_ctime
+            file_info.append((file_name,mod_time))
+
+if(file_info):
+    # if multiple files then sort by creation time
+    if isinstance(file_info,list):         
+        file_info.sort(key=lambda x : x[1], reverse = True)
+        requested_file_name = file_info[0][0]
+    if isinstance(file_info,tuple):
+        requested_file_name = file_info[0]
+    
+    #get most recent file and join to create full file path
+
+    requested_file_name = os.path.join(cur_dir, requested_file_name)
+
+    print("Most recent file: \t", file_info[0], "\n")
+    for i in file_info[1:]: print(i)
+
+    print("\nMost recent file saved in folder by user: \n", requested_file_name)
+    OUT = requested_file_name
+
+if not(file_info):
+    OUT = "No files saved by user in this folder"
+    print(OUT)
