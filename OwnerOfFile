@@ -36,7 +36,6 @@ if(file_info):
         requested_file_name = file_info[0]
     
     #get most recent file and join to create full file path
-
     requested_file_name = os.path.join(cur_dir, requested_file_name)
 
     print("Most recent file: \t", file_info[0], "\n")
