@@ -12,11 +12,8 @@ from RevitServices.Persistence import DocumentManager
 from RevitServices.Transactions import TransactionManager
 
 doc = DocumentManager.Instance.CurrentDBDocument
-uiapp = DocumentManager.Instance.CurrentUIApplication
-app = uiapp.Application
-uidoc = DocumentManager.Instance.CurrentUIApplication.ActiveUIDocument
 
- 
+
 def reverseDate(dates): 
 	"""Receives a date in the format dd/mm/yy returns it in the form yy/mm/dd"""
 	reversed_dates = []
@@ -29,7 +26,7 @@ def reverseDate(dates):
 	return reversed_dates
 
 	
-#get str representation of all revisions
+#get all revisions
 rev_ids_str = Revision.GetAllRevisionIds(doc)
 
 #Get information - native Revit id / description field and date 
@@ -39,14 +36,30 @@ dates = [e.RevisionDate for e in rev_ids]
 sequence = [e.SequenceNumber for e in rev_ids]
 segments = reverseDate(dates)
 
+# flip matrix and zip together useful info 
 rev_info = zip(sequence,dates,descriptions, segments, rev_ids)
+#sort by reversed date
 rev_info.sort(key = lambda x : x[3])
 
 sorted_revisions = [rev[4] for rev in rev_info]
+ids = [id.Id for id in sorted_revisions]
 
-dyn_revisions = IN[0]
 
-i_list = List[ElementId](rev_ids_str)
-test = Revision.ReorderRevisionSequence(doc,i_list)
+
+# ---------------- MAIN - Perform Transaction  -----------------
+
+TransactionManager.Instance.ForceCloseTransaction()
+
+# name transaction here 
+with Transaction(doc, "PWL-Dyn: Reorder Revisions") as t: 
+	# Begin transaction
+	t.Start()
+
+	#Create iList (a required .Net assembly) and perform function
+	i_list = List[ElementId](ids)
+	test = Revision.ReorderRevisionSequence(doc,i_list)
+
+	#End transaction
+	t.Commit()
 
 OUT = rev_info
