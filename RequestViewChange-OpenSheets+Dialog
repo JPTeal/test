@@ -1,0 +1,34 @@
+import clr
+clr.AddReference("RevitServices")
+import RevitServices 
+from RevitServices.Persistence import DocumentManager 
+from RevitServices.Transactions import TransactionManager
+
+clr.AddReference("RevitAPI")
+clr.AddReference("RevitAPIUI")
+
+import Autodesk 
+from Autodesk.Revit.DB import * 
+from Autodesk.Revit.UI import TaskDialog
+
+
+doc = DocumentManager.Instance.CurrentDBDocument
+uidoc = DocumentManager.Instance.CurrentUIDocument
+
+TransactionManager.Instance.EnsureInTransaction(doc)
+TransactionManager.Instance.ForceCloseTransaction()
+
+sheets = UnwrapElement(IN[0])
+
+
+dialog = TaskDialog("SheetCreator")
+dialog.MainInstruction = "Would you like to open newly created sheet(s)?"
+dialog.MainContent = "This will open up the newly created sheet(s)"
+"""
+dialog.CommonButtons = TaskDialogCommonButtons.Retry| TaskDialogCommonButtons.Ok | TaskDialogCommonButtons.Cancel
+"""
+dialog.Show()
+
+for sheet in sheets: 
+	uidoc.RequestViewChange(sheet)
+
