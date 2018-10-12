@@ -10,6 +10,7 @@ user_info_filepath = IN[0]
 username = IN[1]
 user_entry = IN[2][1:]
 
+
 user_info = open(user_info_filepath, "r+")
 user_data = user_info.readlines()
 
@@ -17,13 +18,16 @@ user_dict = {}
 for entry in user_data: 
 	name,info = entry.split(":")[0],entry.split(":")[1]
 	user_dict.update({name:info})
-	OUT = name
 
+
+if username in user_data: 
+	OUT ="yay"
 
 if username not in user_info: 
 	user_info.write(username + ":")
 	for entry in user_entry: 
 		user_info.write(entry + ", ")
+	
 		
 user_info.close()
 
